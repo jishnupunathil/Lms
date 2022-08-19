@@ -3,29 +3,6 @@ const router = express.Router()
 const courseModel = require('../src/model/courseModel')
 const mongoose = require('mongoose')
 
-// const jwt = require('jsonwebtoken')
-
-// function verifyToken(req,res,next){
-
-//     if(!req.headers.authorization){
-//         return res.status(401).send('Unauthorized  Request')
-//     }
-//     let token=req.headers.authorization.split(' ')[1]
-
-//     if(token=='null'){
-//         return res.status(401).send('unauthorized 2 request')
-//     }
-
-//     let payload=jwt.verify(token,'secretKey')
-//     console.log(payload)
-
-//     if(!payload){
-//         return res.status(401).send('Unauthorized request')
-//     }
-
-//     req.Bcode=payload.subject
-//     next()
-// }
 
 router.post('/api/add', async (req, res) => {
 
