@@ -80,7 +80,7 @@ router.get('/api/', async (req, res) => {
 })
 
 
-router.post('/api/login', (req, res) => {
+router.post('/login', (req, res) => {
 
     res.header("Access-Control-Allow-Origin", "*")
     res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")

@@ -38,7 +38,7 @@ const fileRouter=require('./routes/file')
  })
 
 // app.use('/admin',adminRouter)
-app.use('/trainer',trainerRouter)
+app.use('api/trainer',trainerRouter)
 app.use('/student',studentRouter)
 app.use('/course',courseRouter)
 app.use('/mean',meanRouter)
