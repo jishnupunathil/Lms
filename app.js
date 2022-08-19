@@ -52,7 +52,9 @@ const meanModel = require('./src/model/meanModel')
 const feedModel = require('./src/model/feedModel')
 
 
-const fileRouter=require('./routes/file')
+// const fileRouter=require('./routes/file')
+//file
+
 
  mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true })
  .then((res)=>{
@@ -62,13 +64,8 @@ const fileRouter=require('./routes/file')
      console.log('error occured while connecting'+err);
  })
 
-// app.use('/admin',adminRouter)
-// app.use('api/trainer',trainerRouter)
-// app.use('/student',studentRouter)
-// app.use('/course',courseRouter)
-// app.use('/mean',meanRouter)
-// app.use('/feedback',feedbackRouter)
-app.use('/file',fileRouter)
+
+ app.use('/file',fileRouter)
 
 //adminRoute
 app.get('/api/admin', async (req, res) => {
