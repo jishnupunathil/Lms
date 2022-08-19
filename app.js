@@ -41,7 +41,12 @@ const checkStdAuth = require('./middleware/check_auth')
 const courseModel = require('./src/model/courseModel')
 
 
-const meanRouter=require('./routes/meanRoute')
+// const meanRouter=require('./routes/meanRoute')
+//mean
+const meanModel = require('./src/model/meanModel')
+
+
+
 const feedbackRouter=require('./routes/feedbackRoute')
 const fileRouter=require('./routes/file')
 
@@ -57,7 +62,7 @@ const fileRouter=require('./routes/file')
 // app.use('api/trainer',trainerRouter)
 // app.use('/student',studentRouter)
 // app.use('/course',courseRouter)
-app.use('/mean',meanRouter)
+// app.use('/mean',meanRouter)
 app.use('/feedback',feedbackRouter)
 app.use('/file',fileRouter)
 
@@ -706,6 +711,63 @@ app.delete('/api/course/:id', async (req, res) => {
             })
 
         }
+    }
+})
+
+//meanRoute
+
+
+app.post('/api/mean/add', async (req, res) => {
+
+    console.log('body', req.body);
+    try {
+        res.header("Access-Control-Allow-Origin", "*")
+        res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+
+        const meanMod = new meanModel({
+
+            head: req.body.head,
+            subhead: req.body.subhead,
+            paragraph: req.body.paragraph,
+            
+        })
+        await meanMod.save()
+
+        res.json({
+
+            success: 1,
+            message: 'mean about successfuly saved'
+
+        })
+
+    }
+    catch (err) {
+        res.json({
+            success: 0,
+            message: 'error occuured while saving' + err
+        })
+
+    }
+})
+
+
+app.get('/api/mean', async (req, res) => {
+
+    try {
+        res.header("Access-Control-Allow-Origin", "*")
+        res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+        let allmean = await meanModel.find()
+        res.json({
+            success: 1,
+            message: 'mean listed succesfuly',
+            item: allmean
+        })
+    }
+    catch (err) {
+        res.json({
+            success: 0,
+            message: 'error occured while testing' + err
+        })
     }
 })
 
