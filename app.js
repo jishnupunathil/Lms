@@ -6,6 +6,8 @@ const cors = require('cors')
 const bodyParser=require('body-parser')
 const path = require('path')
 
+
+
 app.use(express.static(`./dist/lms`))
 
 app.use(cors())
@@ -18,20 +20,10 @@ const studentRouter=require('./routes/studentRoute')
 const courseRouter=require('./routes/courseRoute')
 const meanRouter=require('./routes/meanRoute')
 const feedbackRouter=require('./routes/feedbackRoute')
-
+const courseModel = require('./src/model/courseModel')
 const fileRouter=require('./routes/file')
 
-
-
-
-
-
-
-
-
-
-
- mongoose.connect(process.env.MONGODB_URL,{ useNewUrlParser: true })
+ mongoose.connect('mongodb+srv://jishnu:5YZ18pPqWACLq8CG@cluster0.otjh9.mongodb.net/lms_db?retryWrites=true&w=majority')
  .then((res)=>{
     console.log('database connected successfuly')
 
@@ -42,12 +34,190 @@ const fileRouter=require('./routes/file')
 app.use('/admin',adminRouter)
 app.use('/trainer',trainerRouter)
 app.use('/student',studentRouter)
-app.use('/course',courseRouter)
+// app.use('/course',courseRouter)
 app.use('/mean',meanRouter)
 app.use('/feedback',feedbackRouter)
 
   
 app.use('/file',fileRouter)
+
+
+app.post('/api/course', async (req, res) => {
+
+    console.log('body', req.body);
+    try {
+        res.header("Access-Control-Allow-Origin", "*")
+        res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+
+        const courseMod = new courseModel({
+
+            name: req.body.data.name,
+            duration: req.body.data.duration,
+            image: req.body.data.name,
+            description: req.body.data.description
+        })
+        await courseMod.save()
+
+        res.json({
+
+            success: 1,
+            message: 'Course successfuly saved'
+
+        })
+
+    }
+    catch (err) {
+        res.json({
+            success: 0,
+            message: 'error occuured while saving' + err
+        })
+
+    }
+})
+
+
+app.get('/api/course', async (req, res) => {
+
+    try {
+        res.header("Access-Control-Allow-Origin", "*")
+        res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+        let allcourse = await courseModel.find()
+        res.json({
+            success: 1,
+            message: 'course listed succesfuly',
+            item: allcourse
+        })
+    }
+    catch (err) {
+        res.json({
+            success: 0,
+            message: 'error occured while testing' + err
+        })
+    }
+})
+
+app.get('/api/course/:id', async (req, res) => {
+    let id = req.params.id
+
+    let ValidId = mongoose.Types.ObjectId.isValid(id)
+    if (ValidId) {
+        try {
+
+            let singleCourse = await courseModel.findById({ _id: id })
+            res.json({
+                success: 1,
+                message: 'single Course listed',
+                item: singleCourse
+            })
+
+
+        }
+        catch (err) {
+            res.json({
+                success: 0,
+                message: 'error occured while listing single Book' + err
+            })
+        }
+
+    }
+    else {
+        res.json({
+            success: 0,
+            message: 'invalid id'
+        })
+
+    }
+})
+
+
+app.put('/api/course/:id', async (req, res) => {
+    let id = req.params.id
+    validId = mongoose.Types.ObjectId.isValid(id)
+    if (validId) {
+        try {
+            await courseModel.findByIdAndUpdate({ _id: id }, {
+                $set:
+                {
+                    
+                    name: req.body.name,
+                    duration: req.body.duration,
+                    image: req.body.image,
+                    description: req.body.description
+                }
+            })
+            res.json({
+                success: 1,
+                message: 'Book updated successfuly'
+            })
+        }
+        catch (err) {
+            res.json({
+                success: 0,
+                message: 'error occured while updating' + err
+            })
+        }
+    }
+})
+
+
+app.delete('/api/course/:id', async (req, res) => {
+    let id = req.params.id
+
+    let validId = mongoose.Types.ObjectId.isValid(id)
+    if (validId) {
+        try {
+            await courseModel.deleteOne({ _id: id })
+            res.json({
+                success: 1,
+                message: 'course deleted successsfully'
+            })
+        }
+        catch (err) {
+
+            res.json({
+                success: 0,
+                message: 'error occured while deleting' + err
+            })
+
+        }
+    }
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
