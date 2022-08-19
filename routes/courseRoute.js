@@ -61,7 +61,7 @@ router.post('/api/add', async (req, res) => {
 })
 
 
-router.get('/api/', async (req, res) => {
+router.get('/api', async (req, res) => {
 
     try {
         res.header("Access-Control-Allow-Origin", "*")
