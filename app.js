@@ -47,7 +47,11 @@ const meanModel = require('./src/model/meanModel')
 
 
 
-const feedbackRouter=require('./routes/feedbackRoute')
+// const feedbackRouter=require('./routes/feedbackRoute')
+//feedback
+const feedModel = require('./src/model/feedModel')
+
+
 const fileRouter=require('./routes/file')
 
  mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true })
@@ -63,7 +67,7 @@ const fileRouter=require('./routes/file')
 // app.use('/student',studentRouter)
 // app.use('/course',courseRouter)
 // app.use('/mean',meanRouter)
-app.use('/feedback',feedbackRouter)
+// app.use('/feedback',feedbackRouter)
 app.use('/file',fileRouter)
 
 //adminRoute
@@ -768,6 +772,58 @@ app.get('/api/mean', async (req, res) => {
             success: 0,
             message: 'error occured while testing' + err
         })
+    }
+})
+//feedBackRoute
+
+app.get('/api/feedback', async (req, res) => {
+
+    try {
+        res.header("Access-Control-Allow-Origin", "*")
+        res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+        let allfeed = await feedModel.find()
+        res.json({
+            success: 1,
+            message: 'All feedbacks',
+            item: allfeed
+        })
+    }
+    catch (err) {
+        res.json({
+            success: 0,
+            message: 'error occured while testing' + err
+        })
+    }
+})
+app.post('/api/feedback/add', async (req, res) => {
+
+    console.log('body', req.body);
+    try {
+        res.header("Access-Control-Allow-Origin", "*")
+        res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+
+        const feedMod = new feedModel({
+
+            name: req.body.data.name,
+            email: req.body.data.email,
+            feed: req.body.data.feed
+        })
+        await feedMod.save()
+
+        res.json({
+
+            success: 1,
+            message: 'Feedback saved'
+
+        })
+
+    }
+    catch (err) {
+        res.json({
+            success: 0,
+            message: 'error occuured while saving' + err
+        })
+
     }
 })
 
