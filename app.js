@@ -1,6 +1,5 @@
 const express = require('express')
 const app = express()
-const port=process.env.port || 3000
 const mongoose=require('mongoose')
 const nodemailer=require('nodemailer')
 const path = require('path')
@@ -104,6 +103,6 @@ app.get('/*', function(req, res) {
     res.sendFile(path.join(__dirname + '/dist/lms/index.html'));
    });
 
-app.listen(port,(req,res)=>{
+app.listen(process.env.PORT || 3000,(req,res)=>{
     console.log('listenning to port 3000');
 })
