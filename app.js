@@ -28,13 +28,18 @@ const trainerModel = require('./src/model/trainerModel')
 const checkTrnrAuth = require('./middleware/check_trnAuth')
 
 
-const studentRouter=require('./routes/studentRoute')
+// const studentRouter=require('./routes/studentRoute')
+//student
+const studentModel = require('./src/model/studentModel')
+const checkStdAuth = require('./middleware/check_auth')
+
+
 const courseRouter=require('./routes/courseRoute')
 const meanRouter=require('./routes/meanRoute')
 const feedbackRouter=require('./routes/feedbackRoute')
 const fileRouter=require('./routes/file')
 
- mongoose.connect('mongodb+srv://jishnu:5YZ18pPqWACLq8CG@cluster0.otjh9.mongodb.net/lms_db?retryWrites=true&w=majority')
+ mongoose.connect(process.env.MONGODB_URL, { useNewUrlParser: true })
  .then((res)=>{
     console.log('database connected successfuly')
 
@@ -44,7 +49,7 @@ const fileRouter=require('./routes/file')
 
 // app.use('/admin',adminRouter)
 // app.use('api/trainer',trainerRouter)
-app.use('/student',studentRouter)
+// app.use('/student',studentRouter)
 app.use('/course',courseRouter)
 app.use('/mean',meanRouter)
 app.use('/feedback',feedbackRouter)
@@ -343,6 +348,219 @@ app.delete('/api/trainer/:id', async (req, res) => {
         }
     }
 })
+
+//student
+
+
+
+
+
+
+
+
+app.post('/api/tudent/signUp', (req, res) => {
+
+    console.log('body', req.body);
+
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+
+    bcrypt.hash(req.body.data.password, 10, (err, hash) => {
+        if (err) {
+            return res.json({
+
+                success: 0,
+                message: 'Hashing issue'
+
+            })
+        }
+        else {
+            const studentMod = new studentModel({
+                firstname: req.body.data.firstname,
+                lastname: req.body.data.lastname,
+                course: req.body.data.course,
+                email: req.body.data.email,
+                password: hash
+            })
+            studentMod.save()
+                .then((_) => {
+                    res.json({
+
+                        success: 1,
+                        message: 'student Account create successfully'
+
+                    })
+                })
+                .catch((err) => {
+                    if (err.code === 11000) {
+                        return res.json({
+                            success: 0,
+                            message: 'Account already Exist,Please login'
+                        })
+                    }
+                    res.json({
+                        success: 0,
+                        message: 'Auth Failed'
+                    })
+
+                })
+
+        }
+    })
+})
+
+
+app.get('/api/student', async (req, res) => {
+
+    try {
+        res.header("Access-Control-Allow-Origin", "*")
+        res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+        let allstudent = await studentModel.find()
+        res.json({
+            success: 1,
+            message: 'student listed succesfuly',
+            item: allstudent
+        })
+    }
+    catch (err) {
+        res.json({
+            success: 0,
+            message: 'error occured while testing' + err
+        })
+    }
+})
+
+
+app.post('/api/student/login', (req, res) => {
+
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+
+
+    studentModel.find({ email: req.body.data.email })
+        .exec()
+        .then((result) => {
+            if (result.length < 1) {
+                return res.json({
+                    success: 0,
+                    message: 'Account doesnt exist'
+                })
+            }
+            const user = result[0]
+            bcrypt.compare(req.body.data.password, user.password, (err, ret) => {
+                if (ret) {
+                    const payload = {
+                        userId: user._id
+                    }
+                    const token = jwt.sign(payload, 'webBatch')
+                    return res.json({
+                        success: 1,
+                        token: token,
+                        message: 'login Successfull'
+                    })
+                }
+                else {
+                    return res.json({
+                        success: 0,
+                        message: ' wrong password '
+                    })
+
+
+                }
+
+
+            })
+        })
+        .catch((err) => {
+            res.json({
+                success: 0,
+                message: 'Auth failed'
+            })
+        })
+})
+
+app.get('/api/student/profile', checkStdAuth, (req, res) => {
+
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+
+    const userId = req.userData.userId
+    studentModel.findById(userId)
+        .exec()
+        .then((result) => {
+            res.json({
+                success: 1,
+                data: result
+            })
+        })
+        .catch(err => {
+            res.json({
+                success: 0,
+                message: 'server error'
+            })
+        })
+
+
+
+})
+
+app.get('/api/student/:id',async(req,res)=>{
+    let id=req.params.id
+
+    let ValidId=mongoose.Types.ObjectId.isValid(id)
+    if(ValidId){
+        try{
+
+            let singleStudent=await studentModel.findById({_id:id})
+            res.json({
+                success:1,
+                message:'single student listed',
+                item:singleStudent
+            })
+
+
+        }
+        catch(err){
+            res.json({
+                            success:0,
+                            message:'error occured while listing single student'+err
+                    })
+        }
+
+    }
+    else{
+        res.json({
+            success:0,
+            message:'invalid id'
+        })
+
+    }
+})
+
+app.delete('/api/student/:id', async (req, res) => {
+    let id = req.params.id
+
+    let validId = mongoose.Types.ObjectId.isValid(id)
+    if (validId) {
+        try {
+            await studentModel.deleteOne({ _id: id })
+            res.json({
+                success: 1,
+                message: 'Student removed successsfully'
+            })
+        }
+        catch (err) {
+
+            res.json({
+                success: 0,
+                message: 'error occured while removing' + err
+            })
+
+        }
+    }
+})
+
+
 
 
 
