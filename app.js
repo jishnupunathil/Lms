@@ -4,7 +4,7 @@ const mongoose=require('mongoose')
 const nodemailer=require('nodemailer')
 const path = require('path')
 
-app.use(express.static('./dist/lms'))
+app.use(express.static(`./dist/lms`))
 
 
 const adminRouter=require('./routes/adminRoute')
