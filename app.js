@@ -14,7 +14,14 @@ app.use(cors())
 app.use(bodyParser.json())
 
 
-const adminRouter=require('./routes/adminRoute')
+// const adminRouter=require('./routes/adminRoute')
+//admin
+const adminModel = require('./src/model/adminModel')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+const checkAuth=require('./middleware/check_admAuth')
+
+
 const trainerRouter=require('./routes/trainerRoute')
 const studentRouter=require('./routes/studentRoute')
 const courseRouter=require('./routes/courseRoute')
@@ -30,18 +37,108 @@ const fileRouter=require('./routes/file')
      console.log('error occured while connecting'+err);
  })
 
-app.use('/admin',adminRouter)
+// app.use('/admin',adminRouter)
 app.use('/trainer',trainerRouter)
 app.use('/student',studentRouter)
 app.use('/course',courseRouter)
 app.use('/mean',meanRouter)
 app.use('/feedback',feedbackRouter)
-
-  
 app.use('/file',fileRouter)
 
+//adminRoute
+app.get('/api/admin', async (req, res) => {
+
+    try {
+        res.header("Access-Control-Allow-Origin", "*")
+        res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+        let alladmin = await adminModel.find()
+        res.json({
+            success: 1,
+            message: 'student listed succesfuly',
+            item: alladmin
+        })
+    }
+    catch (err) {
+        res.json({
+            success: 0,
+            message: 'error occured while testing' + err
+        })
+    }
+})
 
 
+app.post('/api/admin/login', (req, res) => {
+
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+
+
+    adminModel.find({ email: req.body.data.email })
+        .exec()
+        .then((result) => {
+            if (result.length < 1) {
+                return res.json({
+                    success: 0,
+                    message: 'Account doesnt exist'
+                })
+            }
+            const user = result[0]
+            bcrypt.compare(req.body.data.password, user.password, (err, ret) => {
+                if (ret) {
+                    const payload = {
+                        userId: user._id
+                    }
+                    const token = jwt.sign(payload, 'BatchWeb')
+                    return res.json({
+                        success: 1,
+                        token: token,
+                        message: 'login Successfull'
+                    })
+                }
+                else {
+                    return res.json({
+                        success: 0,
+                        message: 'wrong password '
+                    })
+
+
+                }
+
+
+            })
+        })
+        .catch((err) => {
+            res.json({
+                success: 0,
+                message: 'Auth failed'
+            })
+        })
+})
+
+ app.get('/api/admin/profile',checkAuth,(req,res)=>{
+
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+
+    const userId=req.userData.userId
+    adminModel.findById(userId)
+    .exec()
+    .then((result)=>{
+        res.json({
+            success:1,
+            data:result
+        })
+    })
+    .catch(err=>{
+        res.json({
+            success:0,
+            message:'server error'
+        })
+    })
+
+
+ 
+})
 
 
 

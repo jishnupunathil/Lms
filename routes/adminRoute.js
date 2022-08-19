@@ -1,9 +1,9 @@
-const express = require('express')
-const router = express.Router()
-const adminModel = require('../src/model/adminModel')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const checkAuth=require('../middleware/check_admAuth')
+// const express = require('express')
+// const router = express.Router()
+// const adminModel = require('../src/model/adminModel')
+// const bcrypt = require('bcrypt')
+// const jwt = require('jsonwebtoken')
+// const checkAuth=require('../middleware/check_admAuth')
 
 
 // router.post('/signUp',(req, res) => {
@@ -150,4 +150,4 @@ router.post('/api/login', (req, res) => {
 })
 
 
-module.exports = router
+// module.exports = router
