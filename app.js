@@ -2,9 +2,14 @@ const express = require('express')
 const app = express()
 const mongoose=require('mongoose')
 const nodemailer=require('nodemailer')
+const cors = require('cors')
+const bodyParser=require('body-parser')
 const path = require('path')
 
 app.use(express.static(`./dist/lms`))
+
+app.use(cors())
+app.use(bodyParser.json())
 
 
 const adminRouter=require('./routes/adminRoute')
@@ -18,16 +23,15 @@ const fileRouter=require('./routes/file')
 
 
 
-const bodyParser=require('body-parser')
-const cors = require('cors')
 
 
 
-app.use(cors())
-app.use(bodyParser.json())
 
 
- mongoose.connect('mongodb+srv://jishnu:5YZ18pPqWACLq8CG@cluster0.otjh9.mongodb.net/lms_db?retryWrites=true&w=majority')
+
+
+
+ mongoose.connect(process.env.MONGODB_URL,{ useNewUrlParser: true })
  .then((res)=>{
     console.log('database connected successfuly')
 
