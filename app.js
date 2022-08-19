@@ -52,7 +52,7 @@ const meanModel = require('./src/model/meanModel')
 const feedModel = require('./src/model/feedModel')
 
 
-// const fileRouter=require('./routes/file')
+const fileRouter=require('./routes/file')
 //file
 
 
