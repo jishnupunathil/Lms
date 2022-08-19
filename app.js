@@ -46,15 +46,6 @@ app.use('/feedback',feedbackRouter)
 app.use('/file',fileRouter)
 
 
-app.use(function(req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, PATCH, DELETE, OPTIONS');
-    next();
-  });
-  app.use(function(req, res, next) {
-    res.render('index');
-  });
 
 app.post('/api/mail',(req,res)=>{
     console.log('request came');
