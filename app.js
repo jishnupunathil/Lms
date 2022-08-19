@@ -22,7 +22,12 @@ const jwt = require('jsonwebtoken')
 const checkAuth=require('./middleware/check_admAuth')
 
 
-const trainerRouter=require('./routes/trainerRoute')
+// const trainerRouter=require('./routes/trainerRoute')
+//trainer
+const trainerModel = require('./src/model/trainerModel')
+const checkTrnrAuth = require('./middleware/check_trnAuth')
+
+
 const studentRouter=require('./routes/studentRoute')
 const courseRouter=require('./routes/courseRoute')
 const meanRouter=require('./routes/meanRoute')
@@ -38,7 +43,7 @@ const fileRouter=require('./routes/file')
  })
 
 // app.use('/admin',adminRouter)
-app.use('api/trainer',trainerRouter)
+// app.use('api/trainer',trainerRouter)
 app.use('/student',studentRouter)
 app.use('/course',courseRouter)
 app.use('/mean',meanRouter)
@@ -135,11 +140,209 @@ app.post('/api/admin/login', (req, res) => {
             message:'server error'
         })
     })
-
-
- 
 })
 
+//trainerRoute
+
+app.post('/api/trainer/signUp', (req, res) => {
+
+    console.log('body', req.body);
+
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+
+    bcrypt.hash(req.body.data.password, 10, (err, hash) => {
+        if (err) {
+            return res.json({
+
+                success: 0,
+                message: 'Hashing issue'
+
+            })
+        }
+        else {
+            const trainerMod = new trainerModel({
+                firstname: req.body.data.firstname,
+                lastname: req.body.data.lastname,
+                course: req.body.data.course,
+                email: req.body.data.email,
+                password: hash
+            })
+            trainerMod.save()
+                .then((_) => {
+                    res.json({
+
+                        success: 1,
+                        message: 'Trainer Account created successfully'
+
+                    })
+                })
+                .catch((err) => {
+                    if (err.code === 11000) {
+                        return res.json({
+                            success: 0,
+                            message: 'Account already Exist,Please login'
+                        })
+                    }
+                    res.json({
+                        success: 0,
+                        message: 'Auth Failed'
+                    })
+
+                })
+
+        }
+    })
+})
+
+
+app.get('/api/trainer', async (req, res) => {
+
+    try {
+        res.header("Access-Control-Allow-Origin", "*")
+        res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+        let alltrainer = await trainerModel.find()
+        res.json({
+            success: 1,
+            message: 'trainer listed succesfuly',
+            item: alltrainer
+        })
+    }
+    catch (err) {
+        res.json({
+            success: 0,
+            message: 'error occured while testing' + err
+        })
+    }
+})
+
+
+app.post('/api/trainer/login', (req, res) => {
+
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+
+
+    trainerModel.find({ email: req.body.data.email })
+        .exec()
+        .then((result) => {
+            if (result.length < 1) {
+                return res.json({
+                    success: 0,
+                    message: 'Account doesnt exist'
+                })
+            }
+            const user = result[0]
+            bcrypt.compare(req.body.data.password, user.password, (err, ret) => {
+                if (ret) {
+                    const payload = {
+                        userId: user._id
+                    }
+                    const token = jwt.sign(payload, 'secretKey')
+                    return res.json({
+                        success: 1,
+                        token: token,
+                        message: 'login Successfull'
+                    })
+                }
+                else {
+                    return res.json({
+                        success: 0,
+                        message: ' wrong password '
+                    })
+
+
+                }
+
+
+            })
+        })
+        .catch((err) => {
+            res.json({
+                success: 0,
+                message: 'Auth failed'
+            })
+        })
+})
+
+
+app.get('/api/trainer/profile', checkTrnrAuth, (req, res) => {
+
+    res.header("Access-Control-Allow-Origin", "*")
+    res.header("Access-Control-Allow-Methods: GET,POST,PUT,DELETE")
+
+    const userId = req.userData.userId
+    trainerModel.findById(userId)
+        .exec()
+        .then((result) => {
+            res.json({
+                success: 1,
+                data: result
+            })
+        })
+        .catch(err => {
+            res.json({
+                success: 0,
+                message: 'server error'
+            })
+        })
+})
+
+app.get('/api/trainer/:id',async(req,res)=>{
+    let id=req.params.id
+
+    let ValidId=mongoose.Types.ObjectId.isValid(id)
+    if(ValidId){
+        try{
+
+            let singleTrainer=await trainerModel.findById({_id:id})
+            res.json({
+                success:1,
+                message:'single student listed',
+                item:singleTrainer
+            })
+
+
+        }
+        catch(err){
+            res.json({
+                            success:0,
+                            message:'error occured while listing single student'+err
+                    })
+        }
+
+    }
+    else{
+        res.json({
+            success:0,
+            message:'invalid id'
+        })
+
+    }
+})
+
+app.delete('/api/trainer/:id', async (req, res) => {
+    let id = req.params.id
+
+    let validId = mongoose.Types.ObjectId.isValid(id)
+    if (validId) {
+        try {
+            await trainerModel.deleteOne({ _id: id })
+            res.json({
+                success: 1,
+                message: 'trainer removed successsfully'
+            })
+        }
+        catch (err) {
+
+            res.json({
+                success: 0,
+                message: 'error occured while removing' + err
+            })
+
+        }
+    }
+})
 
 
 
