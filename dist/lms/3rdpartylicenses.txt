@@ -149,6 +149,8 @@ THE SOFTWARE.
 
 ng2-file-upload
 
+ngx-pagination
+
 ngx-toastr
 MIT
 The MIT License (MIT)
